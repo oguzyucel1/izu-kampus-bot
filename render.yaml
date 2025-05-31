@@ -1,7 +1,0 @@
-services:
-  - type: cron
-    name: kampusbot-job
-    runtime: python
-    schedule: "*/10 * * * *" # her 10 dakikada bir
-    buildCommand: ""
-    startCommand: "python main.py"
