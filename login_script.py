@@ -40,10 +40,11 @@ else:
 
 # 4. Menüde "Sınav Sonuçları" linkini bul ve tıkla
 try:
-    sinav_link = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
-    )
-    sinav_link.click()
+    #sinav_link = WebDriverWait(driver, 10).until(
+        #EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
+   # )
+    #sinav_link.click()
+    driver.get("https://kampus.izu.edu.tr/Ogr/OgrDersSinav")
     print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
 except Exception as e:
     print(f"❌ Bağlantıya tıklanamadı: {e}")
