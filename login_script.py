@@ -43,24 +43,18 @@ if "login" in driver.current_url.lower():
 else:
     print(f"✅ Giriş başarılı! Şu anda bu sayfadasın: {driver.current_url}")
 
-# 4. "Sınav Sonuçları" menüsüne tıkla
+# ✅ "Sınav Sonuçları" sayfasına doğrudan JavaScript ile yönlen
 try:
-    # Önce bağlantının görünmesini ve tıklanabilir olmasını bekle
-    sinav_link = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//a[@menuilsemno='2055']"))
-    )
-    driver.execute_script("arguments[0].click();", sinav_link)
-    print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
-except TimeoutException:
-    print("❌ 'Sınav Sonuçları' menüsü bulunamadı (Timeout).")
-    driver.quit()
-    exit()
+    js_code = """History.navigateToPath(decodeURIComponent('%2F%2Fkampus.izu.edu.tr%3A443%2FOgr%2FOgrDersSinav'), decodeURIComponent('Sınav Sonuçları'));"""
+    driver.execute_script(js_code)
+    print("✅ JavaScript ile sınav sayfasına yönlendirildi.")
+    time.sleep(5)
 except Exception as e:
-    print(f"❌ Bağlantıya tıklanamadı: {e}")
+    print(f"❌ JavaScript yönlendirmesi başarısız: {e}")
     driver.quit()
     exit()
 
-# 5. Notlar tablosunun yüklenmesini bekle
+# ✅ Sayfa tamamen yüklendi mi kontrol et
 try:
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.XPATH, "//table[contains(@class, 'table-striped')]"))
@@ -70,13 +64,14 @@ except:
     print("❌ Notlar tablosu bulunamadı.")
     with open("sinav_sonuclari.html", "w", encoding="utf-8") as f:
         f.write(driver.page_source)
-    print("⚠️ Sayfa HTML'si yine de kaydedildi (sorun araştırılabilir).")
+    print("⚠️ HTML yine de kaydedildi.")
     driver.quit()
     exit()
 
-# 6. HTML sayfasını kaydet
+# ✅ HTML'i kaydet
 with open("sinav_sonuclari.html", "w", encoding="utf-8") as f:
     f.write(driver.page_source)
 print("📄 Sayfa HTML olarak kaydedildi.")
 
+driver.quit()
 driver.quit()
