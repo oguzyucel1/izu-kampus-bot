@@ -42,8 +42,11 @@ else:
 
 # Menüye tıkla
 try:
-   driver.get("https://kampus.izu.edu.tr/Ogr/OgrDersSinav")
-    print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
+    sinav_link = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
+    )
+    sinav_link.click()
+    print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")  # ← BU SATIR doğru yerde
 except Exception as e:
     print(f"❌ Bağlantıya tıklanamadı: {e}")
     driver.quit()
