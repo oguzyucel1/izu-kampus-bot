@@ -45,12 +45,16 @@ else:
 
 # JavaScript ile Sınav Sonuçları sayfasına git
 try:
-    js_code = """History.navigateToPath(decodeURIComponent('%2F%2Fkampus.izu.edu.tr%3A443%2FOgr%2FOgrDersSinav'), decodeURIComponent('Sınav Sonuçları'));"""
-    driver.execute_script(js_code)
-    print("✅ JavaScript ile sınav sayfasına yönlendirildi.")
+    sinav_link = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
+    )
+    sinav_link.click()
+     print("✅ Menüden 'Sınav Sonuçları' bağlantısına tıklandı.")
+except Exception as e:
+    print(f"❌ Bağlantıya tıklanamadı: {e}")
 
     # Sınav tablosunun yüklenmesini bekle
-    WebDriverWait(driver, 15).until(
+    WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.XPATH, "//table[contains(@class, 'table-striped')]"))
     )
     print("✅ Notlar tablosu yüklendi.")
