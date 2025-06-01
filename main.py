@@ -1,13 +1,13 @@
 import subprocess
 
 # 1. Giriş yap ve HTML dosyasını al
-print("🔐 1. Login ve sınav sayfası çekiliyor...")
-subprocess.run(["python", "login_script.py"])
+print("\n 🔐 [1/3]  Login ve sınav sayfası çekiliyor... \n")
+subprocess.run(["python", "login_script.py"]
 
 # 2. HTML'den JSON'a dönüştür
-print("💾 2. HTML'den notlar ayrıştırılıyor ve kaydediliyor...")
+print("\n 💾 [2/3]  HTML'den notlar ayrıştırılıyor ve kaydediliyor... \n")
 subprocess.run(["python", "save_grades.py"])
 
 # 3. Güncel notlar kontrol ediliyor
-print("🔍 3. Değişiklik kontrolü yapılıyor...")
+print("\n🔍 [3/3]  Değişiklik kontrolü yapılıyor... \n")
 subprocess.run(["python", "check_updates.py"])
