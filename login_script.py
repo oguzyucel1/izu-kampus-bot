@@ -7,34 +7,29 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Ortam değişkenlerini yükle
+# .env dosyasını yükle
 load_dotenv()
 KULLANICI_ADI = os.getenv("KULLANICI_ADI")
 SIFRE = os.getenv("SIFRE")
 
-# Tarayıcı ayarları
+# Tarayıcıyı başlat
 options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # Render'da headless gerekli
+options.add_argument("--start-maximized")
+options.add_argument("--headless")  # Localde çalıştırmak için bu satır açılmalı!!!
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-
 driver = webdriver.Chrome(options=options)
 
-# Kampüs giriş sayfasına git
+# 1. Giriş Sayfasına Git
 driver.get("https://kampus.izu.edu.tr/login")
 
-# Giriş formunu doldur
-try:
-    driver.find_element(By.ID, "user_name").send_keys(KULLANICI_ADI)
-    sifre_input = driver.find_element(By.ID, "user_pas")
-    sifre_input.send_keys(SIFRE)
-    sifre_input.send_keys(Keys.RETURN)
-except:
-    print("❌ Giriş inputları bulunamadı.")
-    driver.quit()
-    exit()
+# 2. Kullanıcı adı ve şifre gir
+driver.find_element(By.ID, "user_name").send_keys(KULLANICI_ADI)
+sifre_input = driver.find_element(By.ID, "user_pas")
+sifre_input.send_keys(SIFRE)
+sifre_input.send_keys(Keys.RETURN)
 
-# Giriş sonrası yönlendirmeyi bekle
+# 3. Giriş sonrası yönlendirme kontrolü
 time.sleep(5)
 if "login" in driver.current_url.lower():
     print("❌ Giriş başarısız. Login sayfasında kaldı.")
@@ -43,33 +38,34 @@ if "login" in driver.current_url.lower():
 else:
     print(f"✅ Giriş başarılı! Şu anda bu sayfadasın: {driver.current_url}")
 
-# JavaScript ile Sınav Sonuçları sayfasına git
+# 4. Menüde "Sınav Sonuçları" linkini bul ve tıkla
 try:
-    sinav_link = WebDriverWait(driver, 20).until(
+    sinav_link = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
     )
     sinav_link.click()
-    print("✅ Menüden 'Sınav Sonuçları' bağlantısına tıklandı.")
+    print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
 except Exception as e:
     print(f"❌ Bağlantıya tıklanamadı: {e}")
+    driver.quit()
+    exit()
 
-    # Sınav tablosunun yüklenmesini bekle
-    WebDriverWait(driver, 20).until(
+# 5. Sayfanın yüklenmesini bekle
+try:
+    WebDriverWait(driver, 15).until(
         EC.presence_of_element_located((By.XPATH, "//table[contains(@class, 'table-striped')]"))
     )
     print("✅ Notlar tablosu yüklendi.")
 except:
     print("❌ Notlar tablosu bulunamadı.")
-    # Yine de sayfa kaydedilsin
-    with open("sinav_sonuclari.html", "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
-    print("⚠️ HTML yine de kaydedildi.")
     driver.quit()
     exit()
 
-# Sayfa HTML'sini kaydet
+# 6. Sayfanın HTML içeriğini kaydet
 with open("sinav_sonuclari.html", "w", encoding="utf-8") as f:
     f.write(driver.page_source)
-print("📄 Sayfa HTML olarak kaydedildi.")
 
-driver.quit()
+print("📄 Sınav sonuçları sayfası kaydedildi: sinav_sonuclari.html")
+
+# Tarayıcıyı açık bırakmak istersen:
+# driver.quit()
