@@ -19,6 +19,11 @@ def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": message}
     requests.post(url, data=data)
+    
+def send_file_to_telegram(file_path, caption="📄 Dosya"):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    with open(file_path, "rb") as file:
+        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": file})
 
 def parse_new_html(path):
     with open(path, "r", encoding="utf-8") as file:
@@ -123,6 +128,7 @@ if farklar:
         })
     with open(OLD_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(yeni_kayitlar, f, ensure_ascii=False, indent=2)
+        send_file_to_telegram("sinav_sonuclari.html", "📄 Son çekilen HTML dosyası")
 else:
     mesaj = "🔁 Yeni not girişi veya değişiklik tespit edilmedi."
     print(mesaj)
