@@ -49,7 +49,7 @@ try:
         EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
     )
     sinav_link.click()
-     print("✅ Menüden 'Sınav Sonuçları' bağlantısına tıklandı.")
+    print("✅ Menüden 'Sınav Sonuçları' bağlantısına tıklandı.")
 except Exception as e:
     print(f"❌ Bağlantıya tıklanamadı: {e}")
 
