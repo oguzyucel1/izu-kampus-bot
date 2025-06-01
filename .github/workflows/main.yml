@@ -2,8 +2,8 @@ name: Kampüs Not Kontrol Botu
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # her 10 dakikada bir
-  workflow_dispatch:   
+    - cron: "*/7 * * * *"  # her 10 dakikada bir
+     
 
 jobs:
   run-bot:
