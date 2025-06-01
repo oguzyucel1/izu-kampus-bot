@@ -14,11 +14,19 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
+def send_file_to_telegram(file_path, caption="📄 Dosya"):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    with open(file_path, "rb") as file:
+        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": file})
+
+
 def send_telegram_message(message):
     """Telegram'a mesaj gönderir"""
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": message}
     requests.post(url, data=data)
+
+
 
 def parse_new_html(path):
     with open(path, "r", encoding="utf-8") as file:
@@ -127,3 +135,6 @@ else:
     mesaj = "🔁 Yeni not girişi veya değişiklik tespit edilmedi."
     print(mesaj)
     send_telegram_message(mesaj)
+    send_file_to_telegram("sinav_sonuclari.html", "📄 Son çekilen HTML dosyası")
+    send_file_to_telegram("onceki_notlar_duzenli.json", "🧾 Güncel JSON verisi")
+
