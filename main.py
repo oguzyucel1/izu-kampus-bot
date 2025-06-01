@@ -1,13 +1,28 @@
 import subprocess
+import requests
+import os
+from dotenv import load_dotenv
 
-# 1. Giriş yap ve HTML dosyasını al
-print("\n 🔐 [1/3]  Login ve sınav sayfası çekiliyor... \n")
-subprocess.run(["python", "login_script.py"])
+load_dotenv()
 
-# 2. HTML'den JSON'a dönüştür
-print("\n 💾 [2/3]  HTML'den notlar ayrıştırılıyor ve kaydediliyor... \n")
-subprocess.run(["python", "save_grades.py"])
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
-# 3. Güncel notlar kontrol ediliyor
-print("\n🔍 [3/3]  Değişiklik kontrolü yapılıyor... \n")
-subprocess.run(["python", "check_updates.py"])
+def send_file_to_telegram(file_path, caption="📄 Dosya"):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    with open(file_path, "rb") as file:
+        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": file})
+
+print("🔐 [1/3] Login ve sınav sayfası çekiliyor...")
+subprocess.run(["python", "login_script.py"], check=True)
+
+# Her durumda HTML gönder
+html_path = "sinav_sonuclari.html"
+if os.path.exists(html_path):
+    send_file_to_telegram(html_path, "📄 Güncel sınav sayfası HTML içeriği")
+
+print("💾 [2/3] HTML'den notlar ayrıştırılıyor ve kaydediliyor...")
+subprocess.run(["python", "save_grades.py"], check=True)
+
+print("🔍 [3/3] Değişiklik kontrolü yapılıyor...")
+subprocess.run(["python", "check_updates.py"], check=True)
