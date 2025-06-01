@@ -53,7 +53,7 @@ except Exception as e:
 
 # 5. Sayfanın yüklenmesini bekle
 try:
-    WebDriverWait(driver, 15).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.XPATH, "//table[contains(@class, 'table-striped')]"))
     )
     print("✅ Notlar tablosu yüklendi.")
