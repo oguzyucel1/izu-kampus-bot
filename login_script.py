@@ -15,7 +15,7 @@ SIFRE = os.getenv("SIFRE")
 # Tarayıcıyı başlat
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
-options.add_argument("--headless")  # Localde çalıştırmak için bu satır açılmalı!!!
+options.add_argument("--headless")  # Localde çalıştırmak için bu satır devre dışı bırakılmalı!
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
