@@ -80,7 +80,7 @@ def farklari_bul(yeni, eski):
     for kod, bilgiler in yeni.items():
         if kod not in eski:
             for sinav in bilgiler["Sınavlar"]:
-                if sinav["Not"] and sinav["Not"] != "GM":
+                if sinav["Not"]:
                     farklar.append((kod, bilgiler["Ders Adı"], sinav, "Yeni sınav türü"))
         else:
             eski_sinavlar = eski[kod]["Sınavlar"]
@@ -94,7 +94,7 @@ def farklari_bul(yeni, eski):
                     elif onceki_not != yeni_not and onceki_not != "" and yeni_not != "":
                         farklar.append((kod, bilgiler["Ders Adı"], sinav, "Not değiştirildi"))
                 else:
-                    if sinav["Not"] and sinav["Not"] != "GM":
+                    if sinav["Not"]:
                         farklar.append((kod, bilgiler["Ders Adı"], sinav, "Yeni sınav türü"))
     return farklar
 
