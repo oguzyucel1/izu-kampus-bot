@@ -28,7 +28,7 @@ options = webdriver.ChromeOptions()
 
 options.add_argument("--start-maximized")
 
-#options.add_argument("--headless")  # Localde çalıştırmak için bu satır açılmalı!!!
+options.add_argument("--headless")  # Localde çalıştırmak için bu satır açılmalı!!!
 
 options.add_argument("--no-sandbox")
 
