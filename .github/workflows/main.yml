@@ -1,6 +1,7 @@
 name: Kampüs Not Kontrol Botu
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "*/7 * * * *"  # her 10 dakikada bir
      
