@@ -46,11 +46,12 @@ def run():
             tarih = normalize(tarih_raw)
 
             yeni_etkinlikler.append({
-                "etkinlik": etkinlik_adi,
-                "saat": saat,
-                "tarih": tarih,
-                "ogretim_uyesi": ogretim_uyesi
+               "etkinlik": normalize(etkinlik_adi),
+               "saat": normalize(saat),
+               "tarih": normalize(tarih),
+               "ogretim_uyesi": normalize(ogretim_uyesi)
             })
+
         except Exception:
             continue
 
