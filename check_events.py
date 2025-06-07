@@ -49,8 +49,10 @@ guncel_etkinlikler = [normalize(e) for e in parse_events()]
 
 
 # Önceki etkinlikleri yükle ve normalize et
-with open(JSON_PATH, "r", encoding="utf-8") as f:
-    onceki_etkinlikler = [normalize(e) for e in json.load(f)]
+if not os.path.exists(JSON_PATH):
+    os.makedirs(CACHE_DIR, exist_ok=True)
+   with open(JSON_PATH, "r", encoding="utf-8") as f:
+       onceki_etkinlikler = [normalize(e) for e in json.load(f)]
 
 # Farkları karşılaştır
 farklar = [e for e in guncel_etkinlikler if e not in onceki_etkinlikler]
