@@ -1,73 +1,53 @@
-import json
-from bs4 import BeautifulSoup
-import re
-from datetime import datetime
 import os
-import requests
+import json
+import re
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+import requests
 
-# Yollar
-HTML_PATH = "home.html"
-JSON_PATH = "onceki_duyurular.json"
-
-# .env'den bilgileri al
+# ENV
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# Telegram fonksiyonları
-def send_message(msg):
+HTML_PATH = "home.html"
+JSON_PATH = "onceki_duyurular.json"
+
+def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+    requests.post(url, data={"chat_id": CHAT_ID, "text": text})
 
-def send_file(file_path, caption):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-    with open(file_path, "rb") as f:
-        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": f})
+def normalize_whitespace(text):
+    return re.sub(r"\s+", " ", text.strip())
 
-# HTML'den duyuruları çıkar
-def parse_announcements(html_path):
-    with open(html_path, "r", encoding="utf-8") as file:
-        soup = BeautifulSoup(file, "html.parser")
-    duyurular = []
-    for panel in soup.select(".panel.panel-default"):
-        title_tag = panel.select_one(".panel-title a")
-        if not title_tag: continue
-        title = title_tag.get_text(strip=True)
-        date_match = re.search(r"\d{2}\.\d{2}\.\d{4}", title_tag.text)
-        tarih = date_match.group(0) if date_match else "Tarih Yok"
-        duyurular.append({"baslik": title, "tarih": tarih})
-    return duyurular
+# Güncel HTML'den duyuruları oku
+with open(HTML_PATH, "r", encoding="utf-8") as f:
+    soup = BeautifulSoup(f, "html.parser")
 
-# Eski veriyi oku
-def load_previous_data():
-    if os.path.exists(JSON_PATH):
-        with open(JSON_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+duyurular = []
+for a in soup.select(".panel-title a.accordion-toggle"):
+    baslik = normalize_whitespace(a.contents[0])
+    tarih = normalize_whitespace(a.find("span").text)
+    duyurular.append({"baslik": baslik, "tarih": tarih})
 
-# Yeni duyuruları karşılaştır
-def find_new_announcements(guncel, onceki):
-    onceki_set = {(d["baslik"], d["tarih"]) for d in onceki}
-    return [d for d in guncel if (d["baslik"], d["tarih"]) not in onceki_set]
-
-# === ANA İŞLEM ===
-guncel_duyurular = parse_announcements(HTML_PATH)
-onceki_duyurular = load_previous_data()
-yeni_duyurular = find_new_announcements(guncel_duyurular, onceki_duyurular)
-
-# Bildirim gönder
-if yeni_duyurular:
-    mesaj = f"📢 <b>Yeni Duyurular ({datetime.now().strftime('%d.%m.%Y %H:%M')})</b>\n\n"
-    for d in yeni_duyurular:
-        mesaj += f"📌 {d['baslik']}\n📅 {d['tarih']}\n🔗 Detaylara sistemden ulaşabilirsiniz\n\n"
-    print("[+] Yeni duyurular bulundu, mesaj gönderildi.")
-    send_message(mesaj)
+# Önceki JSON varsa oku, yoksa boş liste
+if os.path.exists(JSON_PATH):
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        onceki_duyurular = json.load(f)
 else:
-    send_message("🔁 Yeni duyuru bulunamadı.")
-    print("[=] Yeni duyuru yok.")
+    onceki_duyurular = []
 
-# Her durumda güncel veriyi kaydet
+# Karşılaştırma
+yeni_duyurular = [d for d in duyurular if d not in onceki_duyurular]
+
+if yeni_duyurular:
+    mesaj = "🆕 *Yeni Duyurular:*\n\n"
+    for duyuru in yeni_duyurular:
+        mesaj += f"📌 {duyuru['baslik']}\n📅 {duyuru['tarih']}\n📎 Detaylara sistemden ulaşabilirsiniz.\n\n"
+    send_telegram_message(mesaj)
+else:
+    send_telegram_message("📭 Yeni duyuru bulunamadı.")
+
+# Güncel duyuruları JSON'a yaz (cache için)
 with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(guncel_duyurular, f, ensure_ascii=False, indent=2)
-print(f"[✓] JSON güncellendi: {JSON_PATH}")
+    json.dump(duyurular, f, ensure_ascii=False, indent=2)
