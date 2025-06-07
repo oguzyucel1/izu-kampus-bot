@@ -32,7 +32,6 @@ def run():
     with open(HTML_PATH, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
 
-    # Güncel duyuruları HTML'den topla
     yeni_duyurular = []
     for a in soup.select("a.accordion-toggle"):
         baslik = normalize(a.contents[0])
@@ -40,17 +39,12 @@ def run():
         tarih = normalize(tarih_span.get_text()) if tarih_span else ""
         yeni_duyurular.append({"baslik": baslik, "tarih": tarih})
 
-    # İlk defa çalışıyorsa: sadece JSON'a kaydet, bildirim atma
     try:
         with open(JSON_PATH, "r", encoding="utf-8") as f:
             onceki_duyurular = json.load(f)
     except FileNotFoundError:
-        with open(JSON_PATH, "w", encoding="utf-8") as f:
-            json.dump(yeni_duyurular, f, ensure_ascii=False, indent=2)
-        print("🟡 İlk çalıştırma: JSON oluşturuldu, bildirim gönderilmedi.")
-        return
+        onceki_duyurular = []
 
-    # Karşılaştırma
     eski_set = set((d["baslik"], d["tarih"]) for d in onceki_duyurular)
     yeni_set = set((d["baslik"], d["tarih"]) for d in yeni_duyurular)
     farklar = yeni_set - eski_set
@@ -63,12 +57,10 @@ def run():
                 f"📅 {tarih}\n"
                 "🔗 Detaylara sistemden ulaşabilirsiniz."
             )
-            # Markdown V2 kullanmak istiyorsan parse_mode ekle
             send_telegram_message(mesaj)
     else:
         send_telegram_message("📢 Yeni duyuru bulunamadı.")
 
-    # En sonunda güncel duyuruları kaydet
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(yeni_duyurular, f, ensure_ascii=False, indent=2)
 
