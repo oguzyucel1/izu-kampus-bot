@@ -64,8 +64,8 @@ if yeni_duyurular:
 
         mesaj = f"📢 Yeni duyuru: {baslik.strip()}\n📅 Tarih: {tarih.strip()}\n📌 Detaylara sistemden ulaşabilirsiniz."
         send_telegram_message(mesaj)
-else:
-    print("✅ Yeni duyuru yok.")
+else :
+    send_telegram_message("🔔 Yeni duyuru bulunamadı.")
 
 # Güncelleme
 with open(JSON_PATH, "w", encoding="utf-8") as f:
