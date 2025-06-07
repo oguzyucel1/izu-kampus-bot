@@ -9,12 +9,6 @@ subprocess.run(["python", "save_grades.py"], check=True)
 print("🔍 [3/7] Notlarda değişiklik kontrolü yapılıyor...")
 subprocess.run(["python", "check_grades.py"], check=True)
 
-print("📦 [4/7] Duyurular kaydediliyor...")
-subprocess.run(["python", "save_announcements.py"], check=True)
-
-print("📦 [5/7] Etkinlikler kaydediliyor...")
-subprocess.run(["python", "save_events.py"], check=True)
-
 print("📢 [6/7] Yeni duyurular kontrol ediliyor...")
 subprocess.run(["python", "check_announcements.py"], check=True)
 
