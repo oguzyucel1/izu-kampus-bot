@@ -46,26 +46,28 @@ def parse_events():
 # ✔ Ana akış
 guncel_etkinlikler = [normalize(e) for e in parse_events()]
 
-
-
-# Önceki etkinlikleri yükle ve normalize et
+# Eğer JSON dosyası yoksa oluştur
 if not os.path.exists(JSON_PATH):
     os.makedirs(CACHE_DIR, exist_ok=True)
-   with open(JSON_PATH, "r", encoding="utf-8") as f:
-       onceki_etkinlikler = [normalize(e) for e in json.load(f)]
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump([], f)
 
-# Farkları karşılaştır
+# Önceki etkinlikleri yükle ve normalize et
+with open(JSON_PATH, "r", encoding="utf-8") as f:
+    onceki_etkinlikler = [normalize(e) for e in json.load(f)]
+
+# Farkları bul
 farklar = [e for e in guncel_etkinlikler if e not in onceki_etkinlikler]
 
-# Mesaj gönder
+# Bildirim gönder
 if farklar:
     mesaj = "📆 Yeni Etkinlikler:\n\n" + "\n".join(f"• {e}" for e in farklar)
     send_telegram_message(mesaj)
 else:
     send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
-# JSON dosyasına normalize edilmiş haliyle yaz
+# Güncel verileri JSON olarak kaydet
 with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump([normalize(e) for e in guncel_etkinlikler], f, ensure_ascii=False, indent=2)
+    json.dump(guncel_etkinlikler, f, ensure_ascii=False, indent=2)
 
 print("✅ Etkinlikler güncellendi ve cache'e yazıldı.")
