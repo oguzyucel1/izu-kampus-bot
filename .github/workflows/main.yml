@@ -22,7 +22,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          .cache/onceki_*.json
+          .cache/
         key: json-cache-${{ runner.os }}-${{ github.run_id }}
         restore-keys: |
           json-cache-${{ runner.os }}
