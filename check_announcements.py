@@ -41,32 +41,35 @@ for panel in duyuru_divleri:
         duyuru_kimligi = f"{baslik} | {tarih}" if tarih else baslik
         duyurular.append(duyuru_kimligi)
 
-# Eski duyuruları yükle
-try:
+# İlk çalıştırma mı?
+ilk_calisma = not os.path.exists(JSON_PATH)
+
+if not ilk_calisma:
+    # Önceki duyuruları yükle
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         onceki_duyurular = json.load(f)
-except FileNotFoundError:
-    onceki_duyurular = []
 
-# Normalize ederek karşılaştır
-yeni_duyurular = [
-    d for d in duyurular
-    if temizle_metin(d) not in [temizle_metin(e) for e in onceki_duyurular]
-]
+    # Normalize ederek karşılaştır
+    yeni_duyurular = [
+        d for d in duyurular
+        if temizle_metin(d) not in [temizle_metin(e) for e in onceki_duyurular]
+    ]
 
-# Bildirim gönder
-if yeni_duyurular:
-    for duyuru in yeni_duyurular:
-        try:
-            baslik, tarih = duyuru.split("|", 1)
-        except ValueError:
-            baslik, tarih = duyuru, "Tarih yok"
+    # Bildirim gönder
+    if yeni_duyurular:
+        for duyuru in yeni_duyurular:
+            try:
+                baslik, tarih = duyuru.split("|", 1)
+            except ValueError:
+                baslik, tarih = duyuru, "Tarih yok"
 
-        mesaj = f"📢 Yeni duyuru: {baslik.strip()}\n📅 Tarih: {tarih.strip()}\n📌 Detaylara sistemden ulaşabilirsiniz."
-        send_telegram_message(mesaj)
-else :
-    send_telegram_message("🔔 Yeni duyuru bulunamadı.")
+            mesaj = f"📢 Yeni duyuru: {baslik.strip()}\n📅 Tarih: {tarih.strip()}\n📌 Detaylara sistemden ulaşabilirsiniz."
+            send_telegram_message(mesaj)
+    else:
+        send_telegram_message("🔔 Yeni duyuru bulunamadı.")
+else:
+    send_telegram_message("🆕 İlk çalıştırma: duyurular kaydedildi ama Telegram'a mesaj atılmadı.")
 
-# Güncelleme
+# Duyuruları güncelle
 with open(JSON_PATH, "w", encoding="utf-8") as f:
     json.dump(duyurular, f, ensure_ascii=False, indent=2)
