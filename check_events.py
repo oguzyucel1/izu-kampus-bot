@@ -51,4 +51,9 @@ if farklar:
 else:
     send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
+# Güncel listeyi JSON'a yaz
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+    json.dump(guncel, f, ensure_ascii=False, indent=2)
+
+
 
