@@ -46,11 +46,7 @@ def parse_events():
 # ✔ Ana akış
 guncel_etkinlikler = [normalize(e) for e in parse_events()]
 
-# JSON yoksa boş oluştur
-if not os.path.exists(JSON_PATH):
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    with open(JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump([], f)
+
 
 # Önceki etkinlikleri yükle ve normalize et
 with open(JSON_PATH, "r", encoding="utf-8") as f:
