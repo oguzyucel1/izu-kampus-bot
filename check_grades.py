@@ -1,34 +1,34 @@
+import os
 import json
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from datetime import datetime
-import os
 import requests
 from dotenv import load_dotenv
 
-OLD_JSON_PATH = "onceki_notlar_duzenli.json"
-NEW_HTML_PATH = "sinav_sonuclari.html"
-
-# .env dosyasından bot bilgilerini al
+# ENV yükle
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
+
+# Dosya yolları
+HTML_PATH = "sinav_sonuclari.html"
+CACHE_DIR = ".cache"
+JSON_PATH = os.path.join(CACHE_DIR, "onceki_notlar_duzenli.json")
+
+# Telegram fonksiyonları
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    data = {"chat_id": CHAT_ID, "text": message}
+    requests.post(url, data=data)
 
 def send_file_to_telegram(file_path, caption="📄 Dosya"):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
     with open(file_path, "rb") as file:
         requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": file})
 
-
-def send_telegram_message(message):
-    """Telegram'a mesaj gönderir"""
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": message}
-    requests.post(url, data=data)
-
-
-
-def parse_new_html(path):
+# HTML'den notları çek
+def parse_html(path):
     with open(path, "r", encoding="utf-8") as file:
         soup = BeautifulSoup(file, "html.parser")
 
@@ -47,9 +47,7 @@ def parse_new_html(path):
             if len(tds) < 6:
                 i += 1
                 continue
-            kod = tds[0].text.strip()
-            adi = tds[1].text.strip()
-            ogretmen = tds[2].text.strip()
+            kod, adi, ogretmen = tds[0].text.strip(), tds[1].text.strip(), tds[2].text.strip()
 
             if i + 1 < len(rows):
                 detay = rows[i + 1]
@@ -75,6 +73,7 @@ def parse_new_html(path):
 
     return ders_dict
 
+# Farkları karşılaştır
 def farklari_bul(yeni, eski):
     farklar = []
     for kod, bilgiler in yeni.items():
@@ -98,42 +97,47 @@ def farklari_bul(yeni, eski):
                         farklar.append((kod, bilgiler["Ders Adı"], sinav, "Yeni sınav türü"))
     return farklar
 
-# Eski veriyi yükle
-with open(OLD_JSON_PATH, "r", encoding="utf-8") as f:
+# ✔ Ana akış
+yeni_dict = parse_html(HTML_PATH)
+
+# Önceki json cache'de yoksa boş başlat
+if not os.path.exists(JSON_PATH):
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump([], f, ensure_ascii=False, indent=2)
+
+# Önceki JSON'u yükle
+with open(JSON_PATH, "r", encoding="utf-8") as f:
     eski_json = json.load(f)
 eski_dict = {d["Ders Kodu"]: d for d in eski_json}
-
-# Yeni veriyi çek
-yeni_dict = parse_new_html(NEW_HTML_PATH)
 
 # Farkları bul
 farklar = farklari_bul(yeni_dict, eski_dict)
 
 if farklar:
-    degisim_zamani = datetime.now().strftime("%Y-%m-%d %H:%M")
-    mesaj = f"🆕 Değişiklikler tespit edildi ({degisim_zamani}):\n\n"
-    for kod, adi, sinav, degisiklik_turu in farklar:
+    mesaj = f"🆕 Not değişiklikleri ({datetime.now().strftime('%Y-%m-%d %H:%M')}):\n\n"
+    for kod, adi, sinav, degisiklik in farklar:
         mesaj += (
             f"📘 {kod} - {adi}\n"
-            f"🔄 {degisiklik_turu}: {sinav['Sınav Türü']} - Not: {sinav['Not']} | 🕒 İlan: {degisim_zamani}\n\n"
+            f"🔄 {degisiklik}: {sinav['Sınav Türü']} - Not: {sinav['Not']}\n\n"
         )
     print(mesaj)
     send_telegram_message(mesaj)
-
-    # Yeni veriyi kaydet
-    yeni_kayitlar = []
-    for kod, bilgiler in yeni_dict.items():
-        yeni_kayitlar.append({
-            "Ders Kodu": kod,
-            "Ders Adı": bilgiler["Ders Adı"],
-            "Öğretim Üyesi": bilgiler["Öğretim Üyesi"],
-            "Sınavlar": bilgiler["Sınavlar"]
-        })
-    with open(OLD_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(yeni_kayitlar, f, ensure_ascii=False, indent=2)
 else:
     mesaj = "🔁 Yeni not girişi veya değişiklik tespit edilmedi."
     print(mesaj)
     send_telegram_message(mesaj)
-    send_file_to_telegram("sinav_sonuclari.html", "📄 Son çekilen HTML dosyası")
-    send_file_to_telegram("onceki_notlar_duzenli.json", "🧾 Güncel JSON verisi")
+
+# Yeni JSON'u cache’e yaz
+duzenlenmis = []
+for kod, bilgiler in yeni_dict.items():
+    duzenlenmis.append({
+        "Ders Kodu": kod,
+        "Ders Adı": bilgiler["Ders Adı"],
+        "Öğretim Üyesi": bilgiler["Öğretim Üyesi"],
+        "Sınavlar": bilgiler["Sınavlar"]
+    })
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+    json.dump(duzenlenmis, f, ensure_ascii=False, indent=2)
+
+print("✅ Güncellenmiş JSON cache'e yazıldı.")
