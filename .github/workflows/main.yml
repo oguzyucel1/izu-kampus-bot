@@ -2,7 +2,7 @@ name: Not Takip Botu
 
 on:
   schedule:
-    - cron: "*/10 * * * *"  # Her 10 dakikada bir çalışır
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -13,6 +13,7 @@ jobs:
         CHAT_ID: ${{ secrets.CHAT_ID }}
         KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
         SIFRE: ${{ secrets.SIFRE }}
+
     steps:
     - name: 📥 Repo klonlanıyor
       uses: actions/checkout@v3
@@ -21,7 +22,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          onceki_*.json
+          .cache/onceki_*.json
         key: json-cache-${{ runner.os }}-${{ github.run_id }}
         restore-keys: |
           json-cache-${{ runner.os }}
@@ -36,3 +37,12 @@ jobs:
 
     - name: 🚀 Bot çalıştırılıyor
       run: python main.py
+
+    - name: 💾 Güncel JSON dosyaları cache'e yazılıyor
+      uses: actions/cache@v3
+      with:
+        path: |
+          .cache/onceki_*.json
+        key: json-cache-${{ runner.os }}-${{ github.run_id }}
+        restore-keys: |
+          json-cache-${{ runner.os }}
