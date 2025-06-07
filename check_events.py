@@ -62,8 +62,8 @@ def run():
         onceki_etkinlikler = []
 
     # Karşılaştırma
-    eski_set = set((e["etkinlik"], e["saat"], e["tarih"], e["ogretim_uyesi"]) for e in onceki_etkinlikler)
-    yeni_set = set((e["etkinlik"], e["saat"], e["tarih"], e["ogretim_uyesi"]) for e in yeni_etkinlikler)
+    eski_set = set((normalize(e["etkinlik"]), normalize(e["saat"]), normalize(e["tarih"]), normalize(e["ogretim_uyesi"])) for e in onceki_etkinlikler)
+    yeni_set = set((normalize(e["etkinlik"]), normalize(e["saat"]), normalize(e["tarih"]), normalize(e["ogretim_uyesi"])) for e in yeni_etkinlikler)
     farklar = yeni_set - eski_set
 
     if farklar:
