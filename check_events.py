@@ -62,8 +62,8 @@ if farklar:
 else:
     send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
-# Güncel etkinlikleri JSON'a yaz
+# JSON dosyasına normalize edilmiş haliyle yaz
 with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(guncel_etkinlikler, f, ensure_ascii=False, indent=2)
+    json.dump([normalize(e) for e in guncel_etkinlikler], f, ensure_ascii=False, indent=2)
 
 print("✅ Etkinlikler güncellendi ve cache'e yazıldı.")
