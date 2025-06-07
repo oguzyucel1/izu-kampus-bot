@@ -1,90 +1,89 @@
 import json
-import re
+from bs4 import BeautifulSoup
+from datetime import datetime
 import os
 import requests
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-load_dotenv()
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-
-def send_telegram_message(text):
-    if not BOT_TOKEN or not CHAT_ID:
-        print("❌ BOT_TOKEN veya CHAT_ID eksik")
-        return
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    try:
-        resp = requests.post(url, data={"chat_id": CHAT_ID, "text": text})
-        if resp.status_code != 200:
-            print(f"Telegram mesajı gönderilemedi: {resp.text}")
-    except Exception as e:
-        print(f"Telegram hatası: {e}")
-
-def normalize(text):
-    return re.sub(r"\s+", " ", text.strip())
-
+# Yol tanımları
 HTML_PATH = "home.html"
 JSON_PATH = "onceki_etkinlikler.json"
 
-def run():
-    with open(HTML_PATH, "r", encoding="utf-8") as f:
-        soup = BeautifulSoup(f, "html.parser")
+# .env dosyasından bot bilgilerini al
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
-    # HTML'den etkinlik verilerini çıkar
-    yeni_etkinlikler = []
+# Telegram mesaj fonksiyonları
+def send_message(msg):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, data={"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"})
+
+def send_file(file_path, caption):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    with open(file_path, "rb") as f:
+        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": f})
+
+# HTML'den etkinlikleri ayrıştır
+def parse_events(html_path):
+    with open(html_path, "r", encoding="utf-8") as file:
+        soup = BeautifulSoup(file, "html.parser")
+    etkinlikler = []
     for li in soup.select("li.hoverable"):
         try:
-            span = li.select_one("div.desc > span")
-            raw_text = normalize(span.contents[0])
-            saat, etkinlik_adi = raw_text.split("|", 1)
-            saat = normalize(saat)
-            etkinlik_adi = normalize(etkinlik_adi)
-            ogretim_uyesi = normalize(span.find("i").get_text().strip("()"))
-            tarih_raw = li.select_one("div.date").get_text(separator="\n").strip().split("\n")[-1]
-            tarih = normalize(tarih_raw)
+            detay_span = li.select_one(".content-col2 .desc span")
+            date_div = li.select_one(".col2 .date")
+            if detay_span and date_div:
+                saat_ve_ad = detay_span.text.strip().split("|")
+                etkinlik = saat_ve_ad[1].strip() if len(saat_ve_ad) > 1 else "Etkinlik Bilgisi Yok"
+                saat = saat_ve_ad[0].strip() if len(saat_ve_ad) > 1 else ""
+                ogretim_uyesi = detay_span.find("i").text.strip("()") if detay_span.find("i") else ""
+                tarih_satiri = date_div.text.strip().split("\n")
+                tarih = tarih_satiri[1].strip() if len(tarih_satiri) > 1 else ""
+                etkinlikler.append({
+                    "etkinlik": etkinlik,
+                    "saat": saat,
+                    "tarih": tarih,
+                    "ogretim_uyesi": ogretim_uyesi
+                })
+        except Exception as e:
+            print(f"[!] Hata: {e}")
+    return etkinlikler
 
-            yeni_etkinlikler.append({
-               "etkinlik": normalize(etkinlik_adi),
-               "saat": normalize(saat),
-               "tarih": normalize(tarih),
-               "ogretim_uyesi": normalize(ogretim_uyesi)
-            })
-
-        except Exception:
-            continue
-
-    # Önceki veriyi oku (yoksa boş liste)
-    try:
+# Önceki verileri oku
+def load_previous_data():
+    if os.path.exists(JSON_PATH):
         with open(JSON_PATH, "r", encoding="utf-8") as f:
-            onceki_etkinlikler = json.load(f)
-    except FileNotFoundError:
-        onceki_etkinlikler = []
+            return json.load(f)
+    return []
 
-    # Karşılaştırma
-    eski_set = set((normalize(e["etkinlik"]), normalize(e["saat"]), normalize(e["tarih"]), normalize(e["ogretim_uyesi"])) for e in onceki_etkinlikler)
-    yeni_set = set((normalize(e["etkinlik"]), normalize(e["saat"]), normalize(e["tarih"]), normalize(e["ogretim_uyesi"])) for e in yeni_etkinlikler)
-    farklar = yeni_set - eski_set
+# Farkları bul
+def find_new_events(guncel, onceki):
+    onceki_set = {(e["etkinlik"], e["saat"], e["tarih"], e["ogretim_uyesi"]) for e in onceki}
+    return [e for e in guncel if (e["etkinlik"], e["saat"], e["tarih"], e["ogretim_uyesi"]) not in onceki_set]
 
-    if farklar:
-        for etkinlik, saat, tarih, hoca in farklar:
-            mesaj = (
-                "*🎉 Yeni Etkinlik:*\n"
-                f"📝 {etkinlik}\n"
-                f"⏰ {tarih} | {saat}\n"
-                f"👤 {hoca}\n"
-                "🔗 Detaylara sistemden ulaşabilirsiniz."
-            )
-            send_telegram_message(mesaj)
-    else:
-        send_telegram_message("🎉 Yeni etkinlik bulunamadı.")
+# === ANA AKIŞ ===
+guncel_etkinlikler = parse_events(HTML_PATH)
+onceki_etkinlikler = load_previous_data()
+yeni_etkinlikler = find_new_events(guncel_etkinlikler, onceki_etkinlikler)
 
-    # JSON dosyasını her zaman güncelle
-    with open(JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(yeni_etkinlikler, f, ensure_ascii=False, indent=2)
+if yeni_etkinlikler:
+    mesaj = f"<b>📣 Yeni Etkinlikler ({datetime.now().strftime('%d.%m.%Y %H:%M')})</b>\n\n"
+    for e in yeni_etkinlikler:
+        mesaj += (
+            f"🔸 <b>{e['etkinlik']}</b>\n"
+            f"⏰ {e['saat']}\n"
+            f"📅 {e['tarih']}\n"
+            f"👤 {e['ogretim_uyesi']}\n"
+            f"📎 Detaylara sistemden ulaşabilirsiniz\n\n"
+        )
+    send_message(mesaj)
+    print("[+] Yeni etkinlikler bulundu, mesaj gönderildi.")
+else:
+    send_message("🔁 Yeni etkinlik bulunamadı.")
+    print("[=] Yeni etkinlik yok.")
 
-    print(f"✅ Karşılaştırma tamamlandı, {JSON_PATH} güncellendi.")
-
-if __name__ == "__main__":
-    run()
+# Her durumda güncel veriyi kaydet
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+    json.dump(guncel_etkinlikler, f, ensure_ascii=False, indent=2)
+print(f"[✓] JSON güncellendi: {JSON_PATH}")
