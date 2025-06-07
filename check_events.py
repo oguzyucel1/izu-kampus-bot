@@ -1,11 +1,10 @@
 import os
 import json
-import re
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-# ENV değişkenlerini yükle
+# ENV yükle
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -20,54 +19,48 @@ def send_telegram_message(text):
     data = {"chat_id": CHAT_ID, "text": text}
     requests.post(url, data=data)
 
-def normalize(text):
-    return re.sub(r"\s+", " ", text.strip())
-
-# Etkinlikleri HTML'den çek
+# Etkinlikleri çek
 def parse_events():
-    with open(HTML_PATH, "r", encoding="utf-8") as file:
-        soup = BeautifulSoup(file, "html.parser")
+    with open(HTML_PATH, "r", encoding="utf-8") as f:
+        soup = BeautifulSoup(f, "html.parser")
 
-    etkinlikler = []
-    for li in soup.select("ul.feeds li.hoverable"):
-        try:
-            baslik_span = li.select_one(".desc span")
-            tarih_div = li.select_one(".date")
-            if baslik_span and tarih_div:
-                baslik = normalize(baslik_span.get_text())
-                tarih = normalize(tarih_div.get_text().replace("\n", " "))
-                etkinlik = f"{tarih} | {baslik}"
-                etkinlikler.append(etkinlik)
-        except Exception as e:
-            print("Etkinlik parse hatası:", e)
+    etkinlikler = {}
+    for li in soup.select("li.hoverable[onclick^='EtkinlikDetayi']"):
+        onclick = li.get("onclick", "")
+        etkinlik_id = onclick.split("(")[-1].split(")")[0].strip()
 
+        baslik_tag = li.select_one(".desc span")
+        saat_tarih = li.select_one(".date")
+        if etkinlik_id and baslik_tag and saat_tarih:
+            ad = baslik_tag.get_text(strip=True)
+            saat = saat_tarih.get_text(strip=True).replace("\n", " ")
+            etkinlikler[etkinlik_id] = f"{ad} - {saat}"
     return etkinlikler
 
 # ✔ Ana akış
-guncel_etkinlikler = [normalize(e) for e in parse_events()]
+guncel = parse_events()
 
-# Eğer JSON dosyası yoksa oluştur
+# Cache kontrolü
 if not os.path.exists(JSON_PATH):
     os.makedirs(CACHE_DIR, exist_ok=True)
     with open(JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump([], f)
+        json.dump({}, f)
 
-# Önceki etkinlikleri yükle ve normalize et
 with open(JSON_PATH, "r", encoding="utf-8") as f:
-    onceki_etkinlikler = [normalize(e) for e in json.load(f)]
+    onceki = json.load(f)
 
-# Farkları bul
-farklar = [e for e in guncel_etkinlikler if e not in onceki_etkinlikler]
+# Farklı etkinlik ID'lerini bul
+yeni_eklenenler = {eid: val for eid, val in guncel.items() if eid not in onceki}
 
-# Bildirim gönder
-if farklar:
-    mesaj = "📆 Yeni Etkinlikler:\n\n" + "\n".join(f"• {e}" for e in farklar)
+# Bildirim
+if yeni_eklenenler:
+    mesaj = "📆 Yeni Etkinlikler:\n\n" + "\n".join(f"• {val}" for val in yeni_eklenenler.values())
     send_telegram_message(mesaj)
 else:
     send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
-# Güncel verileri JSON olarak kaydet
+# Güncel etkinlikleri cache'e yaz
 with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(guncel_etkinlikler, f, ensure_ascii=False, indent=2)
+    json.dump(guncel, f, ensure_ascii=False, indent=2)
 
 print("✅ Etkinlikler güncellendi ve cache'e yazıldı.")
