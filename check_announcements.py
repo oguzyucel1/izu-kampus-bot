@@ -56,7 +56,4 @@ if yeni_duyurular:
 else:
     send_telegram_message("🔁 Yeni duyuru bulunamadı.")
 
-# Güncelle ve cache gönder
-with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(duyurular_yeni, f, ensure_ascii=False, indent=2)
-send_file(JSON_PATH, "🧾 Güncel duyurular (cache)")
+
