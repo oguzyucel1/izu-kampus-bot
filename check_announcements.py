@@ -37,7 +37,11 @@ def run():
         baslik = normalize(a.contents[0])
         tarih_span = a.find("span")
         tarih = normalize(tarih_span.get_text()) if tarih_span else ""
-        yeni_duyurular.append({"baslik": baslik, "tarih": tarih})
+        yeni_duyurular.append({
+            "baslik": normalize(baslik),
+            "tarih": normalize(tarih)
+})
+
 
     try:
         with open(JSON_PATH, "r", encoding="utf-8") as f:
