@@ -20,7 +20,6 @@ def send_telegram_message(message):
 def normalize(text):
     return re.sub(r"\s+", " ", text.strip())
 
-# ✅ Yeni: HTML'den duyuruları doğru şekilde çek
 def parse_announcements():
     with open(HTML_PATH, "r", encoding="utf-8") as file:
         soup = BeautifulSoup(file, "html.parser")
@@ -32,8 +31,8 @@ def parse_announcements():
             duyurular.append(duyuru_metni)
     return duyurular
 
-# ✔ Ana akış
-duyurular_yeni = parse_announcements()
+# ✔ Yeni duyuruları al ve normalize et
+duyurular_yeni = [normalize(d) for d in parse_announcements()]
 
 # JSON yoksa boş oluştur
 if not os.path.exists(JSON_PATH):
@@ -41,20 +40,20 @@ if not os.path.exists(JSON_PATH):
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump([], f)
 
-# Eski JSON'u oku
+# Önceki duyuruları yükle ve normalize et
 with open(JSON_PATH, "r", encoding="utf-8") as f:
-    duyurular_eski = json.load(f)
+    duyurular_eski = [normalize(d) for d in json.load(f)]
 
-# Farklıları bul
+# Farkları bul
 yeni_duyurular = [d for d in duyurular_yeni if d not in duyurular_eski]
 
-# Telegram’a gönder ve JSON’u güncelle
+# Mesaj gönder
 if yeni_duyurular:
     mesaj = "📢 Yeni Duyurular:\n\n" + "\n".join(f"• {d}" for d in yeni_duyurular)
     send_telegram_message(mesaj)
 else:
     send_telegram_message("🔁 Yeni duyuru bulunamadı.")
 
-# Cache’e yaz
+# Güncel duyuruları JSON'a yaz
 with open(JSON_PATH, "w", encoding="utf-8") as f:
     json.dump(duyurular_yeni, f, ensure_ascii=False, indent=2)
