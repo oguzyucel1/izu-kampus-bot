@@ -14,7 +14,7 @@ CHAT_ID = os.getenv("CHAT_ID")
 # Dosya yolları
 HTML_PATH = "sinav_sonuclari.html"
 CACHE_DIR = ".cache"
-JSON_PATH = os.path.join(CACHE_DIR, "onceki_notlar_duzenli.json")
+JSON_PATH = os.path.join(CACHE_DIR, "onceki_notlar.json")
 
 # Telegram fonksiyonları
 def send_telegram_message(message):
