@@ -2,40 +2,37 @@ name: Not Takip Botu
 
 on:
   schedule:
-    - cron: "*/7 * * * *"  # Her 7 dakikada bir çalışır
-  workflow_dispatch:  # Manuel çalıştırma
+    - cron: "*/10 * * * *"  # Her 10 dakikada bir çalışır
+  workflow_dispatch:
 
 jobs:
-  build:
+  bot-job:
     runs-on: ubuntu-latest
     env:
-      KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
-      SIFRE: ${{ secrets.SIFRE }}
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      CHAT_ID: ${{ secrets.CHAT_ID }}
-
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
+        SIFRE: ${{ secrets.SIFRE }}
     steps:
     - name: 📥 Repo klonlanıyor
       uses: actions/checkout@v3
+
+    - name: 💾 Önceki JSON dosyaları cache'ten yükleniyor
+      uses: actions/cache@v3
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        path: |
+          onceki_*.json
+        key: json-cache-${{ runner.os }}-${{ github.run_id }}
+        restore-keys: |
+          json-cache-${{ runner.os }}
 
     - name: 🐍 Python kurulumu
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: 📦 Gerekli paketler yükleniyor
+    - name: 📦 Gereken paketler yükleniyor
       run: pip install -r requirements.txt
 
     - name: 🚀 Bot çalıştırılıyor
       run: python main.py
-
-    - name: 🔄 JSON dosyaları commit ve push ediliyor
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git pull origin main
-        git add onceki_*.json
-        git commit -m "✅ Otomatik güncellenmiş JSON dosyaları" || echo "🔹 Değişiklik yok"
-        git push origin main
