@@ -137,4 +137,3 @@ else:
     send_telegram_message(mesaj)
     send_file_to_telegram("sinav_sonuclari.html", "📄 Son çekilen HTML dosyası")
     send_file_to_telegram("onceki_notlar_duzenli.json", "🧾 Güncel JSON verisi")
-
