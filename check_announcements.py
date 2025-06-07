@@ -45,8 +45,8 @@ def run():
     except FileNotFoundError:
         onceki_duyurular = []
 
-    eski_set = set((d["baslik"], d["tarih"]) for d in onceki_duyurular)
-    yeni_set = set((d["baslik"], d["tarih"]) for d in yeni_duyurular)
+    eski_set = set((normalize(d["baslik"]), normalize(d["tarih"])) for d in onceki_duyurular)
+    yeni_set = set((normalize(d["baslik"]), normalize(d["tarih"])) for d in yeni_duyurular)
     farklar = yeni_set - eski_set
 
     if farklar:
