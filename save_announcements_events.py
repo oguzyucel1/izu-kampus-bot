@@ -8,7 +8,6 @@ HTML_PATH = "home.html"
 ANN_JSON = "onceki_duyurular.json"
 EVT_JSON = "onceki_etkinlikler.json"
 
-# 🧼 Metin temizleyici
 def temizle_metin(metin):
     return re.sub(r'\s+', ' ', metin).strip()
 
@@ -16,10 +15,9 @@ def temizle_metin(metin):
 with open(HTML_PATH, "r", encoding="utf-8") as f:
     soup = BeautifulSoup(f, "html.parser")
 
-# DUYURULARI ÇEK
+# --- DUYURULAR ---
 duyurular = []
 duyuru_divleri = soup.select("div.panel.panel-default")
-
 for panel in duyuru_divleri:
     title_tag = panel.select_one("h3.panel-title a")
     if title_tag:
@@ -31,15 +29,17 @@ for panel in duyuru_divleri:
         kimlik = f"{baslik} | {tarih}"
         duyurular.append(kimlik)
 
-# DUYURULARI JSON'A YAZ
+# Duyuruları JSON'a yaz
+os.makedirs(os.path.dirname(ANN_JSON), exist_ok=True)
 with open(ANN_JSON, "w", encoding="utf-8") as f:
     json.dump(duyurular, f, ensure_ascii=False, indent=2)
 print(f"✅ Duyurular kaydedildi: {ANN_JSON}")
+if not duyurular:
+    print("⚠️ Hiç duyuru bulunamadı.")
 
-# ETKİNLİKLERİ ÇEK
+# --- ETKİNLİKLER ---
 etkinlikler = []
 etkinlik_lileri = soup.select("ul.feeds.clearfix > li.hoverable")
-
 for li in etkinlik_lileri:
     desc = li.select_one("div.desc")
     date = li.select_one("div.date")
@@ -50,7 +50,10 @@ for li in etkinlik_lileri:
         kimlik = f"{zaman_baslik_hoca} | {tarih}"
         etkinlikler.append(kimlik)
 
-# ETKİNLİKLERİ JSON'A YAZ
+# Etkinlikleri JSON'a yaz
+os.makedirs(os.path.dirname(EVT_JSON), exist_ok=True)
 with open(EVT_JSON, "w", encoding="utf-8") as f:
     json.dump(etkinlikler, f, ensure_ascii=False, indent=2)
 print(f"✅ Etkinlikler kaydedildi: {EVT_JSON}")
+if not etkinlikler:
+    print("⚠️ Hiç etkinlik bulunamadı.")
