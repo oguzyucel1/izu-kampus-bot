@@ -85,6 +85,8 @@ if yeni_etkinlikler:
             f"📌 Detaylara sistemden ulaşabilirsiniz."
         )
         send_telegram_message(mesaj)
+else :
+     send_telegram_message("🔔 Yeni etkinlik bulunamadı.")
 
 
 # Yeni kayıtları kaydet
