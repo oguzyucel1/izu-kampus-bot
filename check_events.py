@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import requests
 
-# ENV
+# ENV değişkenlerini yükle
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -13,19 +13,20 @@ CHAT_ID = os.getenv("CHAT_ID")
 HTML_PATH = "home.html"
 JSON_PATH = "onceki_etkinlikler.json"
 
+# Telegram mesaj gönderici
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": CHAT_ID, "text": text})
 
+# Boşlukları normalize et
 def normalize_whitespace(text):
     return re.sub(r"\s+", " ", text.strip())
 
-# 1. HTML oku
+# HTML'den etkinlikleri çek
 with open(HTML_PATH, "r", encoding="utf-8") as f:
     soup = BeautifulSoup(f, "html.parser")
 
 etkinlik_listesi = []
-
 li_etiketleri = soup.select("ul.feeds li.hoverable")
 
 for li in li_etiketleri:
@@ -52,37 +53,43 @@ for li in li_etiketleri:
     kimlik = f"{etkinlik_adi} | {saat} | {ogr_uyesi} | {etkinlik_tarihi}"
     etkinlik_listesi.append(kimlik)
 
-# 2. Eski kayıtları yükle (varsa)
-try:
+# JSON var mı kontrol et
+ilk_calisma = not os.path.exists(JSON_PATH)
+
+# İlk çalıştırmadaysa JSON'u sadece kaydet
+if ilk_calisma:
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(etkinlik_listesi, f, ensure_ascii=False, indent=2)
+    print("🆕 İlk çalıştırma, etkinlikler kaydedildi ama Telegram mesajı atılmadı.")
+else:
+    # Eski kayıtları yükle
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         onceki_kayitlar = json.load(f)
-except FileNotFoundError:
-    onceki_kayitlar = []
 
-# 3. Yeni kayıtları tespit et
-yeni_etkinlikler = [
-    k for k in etkinlik_listesi
-    if normalize_whitespace(k) not in [normalize_whitespace(e) for e in onceki_kayitlar]
-]
+    # Farkları bul
+    yeni_etkinlikler = [
+        k for k in etkinlik_listesi
+        if normalize_whitespace(k) not in [normalize_whitespace(e) for e in onceki_kayitlar]
+    ]
 
-# 4. Bildirim
-if yeni_etkinlikler:
-    for k in yeni_etkinlikler:
-        try:
-            etkinlik_adi, saat, ogr_uyesi, etkinlik_tarihi = [par.strip() for par in k.split("|")]
-        except ValueError:
-            continue
+    # Bildirim gönder
+    if yeni_etkinlikler:
+        for k in yeni_etkinlikler:
+            try:
+                etkinlik_adi, saat, ogr_uyesi, etkinlik_tarihi = [par.strip() for par in k.split("|")]
+            except ValueError:
+                continue
 
-        mesaj = (
-            f"📢 Yeni etkinlik: {etkinlik_adi}\n"
-            f"🕒 Tarih: {etkinlik_tarihi} | {saat}\n"
-            f"👤 Öğretim Üyesi: {ogr_uyesi}\n"
-            f"📌 Detaylara sistemden ulaşabilirsiniz."
-        )
-        send_telegram_message(mesaj)
-else:
-    send_telegram_message("🔔 Yeni etkinlik bulunamadı.")
+            mesaj = (
+                f"📢 Yeni etkinlik: {etkinlik_adi}\n"
+                f"🕒 Tarih: {etkinlik_tarihi} | {saat}\n"
+                f"👤 Öğretim Üyesi: {ogr_uyesi}\n"
+                f"📌 Detaylara sistemden ulaşabilirsiniz."
+            )
+            send_telegram_message(mesaj)
+    else:
+        send_telegram_message("🔔 Yeni etkinlik bulunamadı.")
 
-# 5. Güncel etkinlikleri JSON olarak kaydet
-with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(etkinlik_listesi, f, ensure_ascii=False, indent=2)
+    # JSON'u güncelle
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(etkinlik_listesi, f, ensure_ascii=False, indent=2)
