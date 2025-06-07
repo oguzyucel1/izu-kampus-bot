@@ -30,7 +30,7 @@ for panel in duyuru_divleri:
         duyurular.append(kimlik)
 
 # Duyuruları JSON'a yaz
-os.makedirs(os.path.dirname(ANN_JSON), exist_ok=True)
+
 with open(ANN_JSON, "w", encoding="utf-8") as f:
     json.dump(duyurular, f, ensure_ascii=False, indent=2)
 print(f"✅ Duyurular kaydedildi: {ANN_JSON}")
@@ -51,7 +51,7 @@ for li in etkinlik_lileri:
         etkinlikler.append(kimlik)
 
 # Etkinlikleri JSON'a yaz
-os.makedirs(os.path.dirname(EVT_JSON), exist_ok=True)
+
 with open(EVT_JSON, "w", encoding="utf-8") as f:
     json.dump(etkinlikler, f, ensure_ascii=False, indent=2)
 print(f"✅ Etkinlikler kaydedildi: {EVT_JSON}")
