@@ -1,53 +1,62 @@
 import os
 import json
 import re
+import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-import requests
 
-# ENV
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-
 HTML_PATH = "home.html"
-JSON_PATH = "onceki_duyurular.json"
+CACHE_DIR = ".cache"
+JSON_PATH = os.path.join(CACHE_DIR, "onceki_duyurular.json")
 
-def send_telegram_message(text):
+def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": text})
+    data = {"chat_id": CHAT_ID, "text": message}
+    requests.post(url, data=data)
 
-def normalize_whitespace(text):
+def send_file(file_path, caption="📄 Dosya"):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    with open(file_path, "rb") as f:
+        requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"document": f})
+
+def normalize(text):
     return re.sub(r"\s+", " ", text.strip())
 
-# Güncel HTML'den duyuruları oku
-with open(HTML_PATH, "r", encoding="utf-8") as f:
-    soup = BeautifulSoup(f, "html.parser")
+# HTML'den duyuruları çek
+def parse_announcements():
+    with open(HTML_PATH, "r", encoding="utf-8") as file:
+        soup = BeautifulSoup(file, "html.parser")
+    duyurular = []
+    for li in soup.select("ul.announcements li"):
+        baslik = normalize(li.get_text())
+        duyurular.append(baslik)
+    return duyurular
 
-duyurular = []
-for a in soup.select(".panel-title a.accordion-toggle"):
-    baslik = normalize_whitespace(a.contents[0])
-    tarih = normalize_whitespace(a.find("span").text)
-    duyurular.append({"baslik": baslik, "tarih": tarih})
+# Ana akış
+duyurular_yeni = parse_announcements()
 
-# Önceki JSON varsa oku, yoksa boş liste
-if os.path.exists(JSON_PATH):
-    with open(JSON_PATH, "r", encoding="utf-8") as f:
-        onceki_duyurular = json.load(f)
-else:
-    onceki_duyurular = []
+# Cache kontrol
+if not os.path.exists(JSON_PATH):
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump([], f)
 
-# Karşılaştırma
-yeni_duyurular = [d for d in duyurular if d not in onceki_duyurular]
+with open(JSON_PATH, "r", encoding="utf-8") as f:
+    duyurular_eski = json.load(f)
+
+# Farkları bul
+yeni_duyurular = [d for d in duyurular_yeni if d not in duyurular_eski]
 
 if yeni_duyurular:
-    mesaj = "🆕 *Yeni Duyurular:*\n\n"
-    for duyuru in yeni_duyurular:
-        mesaj += f"📌 {duyuru['baslik']}\n📅 {duyuru['tarih']}\n📎 Detaylara sistemden ulaşabilirsiniz.\n\n"
+    mesaj = "📢 Yeni Duyurular:\n\n" + "\n".join(f"• {d}" for d in yeni_duyurular)
     send_telegram_message(mesaj)
 else:
-    send_telegram_message("📭 Yeni duyuru bulunamadı.")
+    send_telegram_message("🔁 Yeni duyuru bulunamadı.")
 
-# Güncel duyuruları JSON'a yaz (cache için)
+# Güncelle ve cache gönder
 with open(JSON_PATH, "w", encoding="utf-8") as f:
-    json.dump(duyurular, f, ensure_ascii=False, indent=2)
+    json.dump(duyurular_yeni, f, ensure_ascii=False, indent=2)
+send_file(JSON_PATH, "🧾 Güncel duyurular (cache)")
