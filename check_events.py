@@ -54,15 +54,12 @@ def run():
         except Exception:
             continue
 
-    # JSON dosyası yoksa ilk defa çalışıyordur
+    # Önceki veriyi oku (yoksa boş liste)
     try:
         with open(JSON_PATH, "r", encoding="utf-8") as f:
             onceki_etkinlikler = json.load(f)
     except FileNotFoundError:
-        with open(JSON_PATH, "w", encoding="utf-8") as f:
-            json.dump(yeni_etkinlikler, f, ensure_ascii=False, indent=2)
-        print("🟡 İlk çalıştırma: JSON oluşturuldu, bildirim gönderilmedi.")
-        return
+        onceki_etkinlikler = []
 
     # Karşılaştırma
     eski_set = set((e["etkinlik"], e["saat"], e["tarih"], e["ogretim_uyesi"]) for e in onceki_etkinlikler)
@@ -82,7 +79,7 @@ def run():
     else:
         send_telegram_message("🎉 Yeni etkinlik bulunamadı.")
 
-    # En son JSON'u güncelle
+    # JSON dosyasını her zaman güncelle
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(yeni_etkinlikler, f, ensure_ascii=False, indent=2)
 
