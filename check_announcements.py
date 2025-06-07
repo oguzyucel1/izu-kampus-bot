@@ -56,4 +56,9 @@ if yeni_duyurular:
 else:
     send_telegram_message("🔁 Yeni duyuru bulunamadı.")
 
+# Yeni duyuruları JSON'a yaz
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+    json.dump(duyurular_yeni, f, ensure_ascii=False, indent=2)
+
+
 
