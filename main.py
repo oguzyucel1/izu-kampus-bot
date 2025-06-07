@@ -1,16 +1,13 @@
 import subprocess
 
-print("🔐 [1/7] Login ve sınav sayfası çekiliyor...")
+print("🔐 [1/4] Login ve sınav sayfası çekiliyor...")
 subprocess.run(["python", "login_script.py"], check=True)
 
-print("💾 [2/7] HTML'den notlar ayrıştırılıyor ve kaydediliyor...")
-subprocess.run(["python", "save_grades.py"], check=True)
-
-print("🔍 [3/7] Notlarda değişiklik kontrolü yapılıyor...")
+print("💾 [2/4] Notlar kaydediliyor ve karşılaştırılıyor...")
 subprocess.run(["python", "check_grades.py"], check=True)
 
-print("📢 [6/7] Yeni duyurular kontrol ediliyor...")
+print("📣 [3/4] Duyurular kontrol ediliyor...")
 subprocess.run(["python", "check_announcements.py"], check=True)
 
-print("📆 [7/7] Yeni etkinlikler kontrol ediliyor...")
+print("📆 [4/4] Etkinlikler kontrol ediliyor...")
 subprocess.run(["python", "check_events.py"], check=True)
