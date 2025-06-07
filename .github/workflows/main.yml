@@ -1,36 +1,33 @@
-name: Kampüs Not Kontrol Botu
+name: Not Takip Botu
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "*/7 * * * *"  # her 10 dakikada bir
-     
+    - cron: "*/7 * * * *"
+  workflow_dispatch:
 
 jobs:
-  run-bot:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
 
     steps:
-      - name: Kodu klonla
-        uses: actions/checkout@v3
+    - name: 📥 Repo klonlanıyor
+      uses: actions/checkout@v3
 
-      - name: Python kurulumu
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+    - name: 🐍 Python kurulumu
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Bağımlılıkları yükle
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: 📦 Gerekli paketler yükleniyor
+      run: pip install -r requirements.txt
 
-      - name: Ortam değişkenlerini ayarla
-        run: |
-          echo "KULLANICI_ADI=${{ secrets.KULLANICI_ADI }}" >> .env
-          echo "SIFRE=${{ secrets.SIFRE }}" >> .env
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "CHAT_ID=${{ secrets.CHAT_ID }}" >> .env
+    - name: 🚀 Bot çalıştırılıyor
+      run: python main.py
 
-      - name: Botu çalıştır
-        run: python main.py
+    - name: 🔄 JSON dosyaları commit ve push ediliyor
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add onceki_*.json
+        git commit -m "✅ Otomatik güncellenmiş JSON dosyaları" || echo "Değişiklik yok, commit yapılmadı"
+        git push
