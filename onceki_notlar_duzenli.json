@@ -1,1 +1,203 @@
-[]
+[
+  {
+    "Ders Kodu": "BIM 408",
+    "Ders Adı": "Kablosuz Ağ Teknolojileri ve Uygulamaları",
+    "Öğretim Üyesi": "Dr. Öğr. Üyesi Erdal ALIMOVSKI",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "92",
+        "Ortalama": "77.43",
+        "Yüzde Dilimi": "40.00 %",
+        "Sınav Tarihi": "11.04.2025",
+        "İlan Tarihi": "13.04.2025"
+      },
+      {
+        "Sınav Türü": "Final 1",
+        "Not": "GM",
+        "Ortalama": "",
+        "Yüzde Dilimi": "60.00 %",
+        "Sınav Tarihi": "26.05.2025",
+        "İlan Tarihi": "13.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "BIM 430",
+    "Ders Adı": "Derin Öğrenme",
+    "Öğretim Üyesi": "Prof. Dr. Tarık ÖZKUL",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "90",
+        "Ortalama": "83.53",
+        "Yüzde Dilimi": "20.00 %",
+        "Sınav Tarihi": "08.04.2025",
+        "İlan Tarihi": "17.04.2025"
+      },
+      {
+        "Sınav Türü": "Kısa Sınav 1",
+        "Not": "50",
+        "Ortalama": "68.91",
+        "Yüzde Dilimi": "20.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "17.04.2025"
+      },
+      {
+        "Sınav Türü": "Uygulama 1",
+        "Not": "83",
+        "Ortalama": "77.47",
+        "Yüzde Dilimi": "20.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "17.04.2025"
+      },
+      {
+        "Sınav Türü": "Derse Katılım 1",
+        "Not": "0",
+        "Ortalama": "63.53",
+        "Yüzde Dilimi": "5.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "17.04.2025"
+      },
+      {
+        "Sınav Türü": "Final 1",
+        "Not": "100",
+        "Ortalama": "88.41",
+        "Yüzde Dilimi": "25.00 %",
+        "Sınav Tarihi": "29.05.2025",
+        "İlan Tarihi": "29.05.2025"
+      },
+      {
+        "Sınav Türü": "Proje 1",
+        "Not": "100",
+        "Ortalama": "99.12",
+        "Yüzde Dilimi": "10.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "17.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "BIM 432",
+    "Ders Adı": "Doğal Dil İşleme",
+    "Öğretim Üyesi": "Dr. Öğr. Üyesi Şengül BAYRAK HAYTA",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "90",
+        "Ortalama": "83.57",
+        "Yüzde Dilimi": "25.00 %",
+        "Sınav Tarihi": "11.04.2025",
+        "İlan Tarihi": "21.04.2025"
+      },
+      {
+        "Sınav Türü": "Uygulama 1",
+        "Not": "",
+        "Ortalama": "",
+        "Yüzde Dilimi": "15.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "21.04.2025"
+      },
+      {
+        "Sınav Türü": "Proje 1",
+        "Not": "",
+        "Ortalama": "",
+        "Yüzde Dilimi": "30.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "21.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "IZU 007",
+    "Ders Adı": "Estetik ve Sanat",
+    "Öğretim Üyesi": "Prof. Dr. Turan KOÇ",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "100",
+        "Ortalama": "65.56",
+        "Yüzde Dilimi": "40.00 %",
+        "Sınav Tarihi": "10.04.2025",
+        "İlan Tarihi": "17.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "YAM 322",
+    "Ders Adı": "İleri Algoritmalar",
+    "Öğretim Üyesi": "Dr. Öğr. Üyesi ARTRIM KJAMILJI",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "68",
+        "Ortalama": "64.46",
+        "Yüzde Dilimi": "30.00 %",
+        "Sınav Tarihi": "07.04.2025",
+        "İlan Tarihi": "19.04.2025"
+      },
+      {
+        "Sınav Türü": "Ödev 1",
+        "Not": "",
+        "Ortalama": "",
+        "Yüzde Dilimi": "20.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "19.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "YAM 432",
+    "Ders Adı": "Uygulamalı Sinir Ağları",
+    "Öğretim Üyesi": "Dr. Öğr. Üyesi Erdal ALIMOVSKI",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Vize 1",
+        "Not": "71",
+        "Ortalama": "60.86",
+        "Yüzde Dilimi": "30.00 %",
+        "Sınav Tarihi": "07.04.2025",
+        "İlan Tarihi": "14.04.2025"
+      },
+      {
+        "Sınav Türü": "Final 1",
+        "Not": "GM",
+        "Ortalama": "",
+        "Yüzde Dilimi": "40.00 %",
+        "Sınav Tarihi": "31.05.2025",
+        "İlan Tarihi": "14.04.2025"
+      },
+      {
+        "Sınav Türü": "Proje 1",
+        "Not": "GM",
+        "Ortalama": "",
+        "Yüzde Dilimi": "30.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "14.04.2025"
+      }
+    ]
+  },
+  {
+    "Ders Kodu": "YAM 442",
+    "Ders Adı": "Bitirme Çalışması 2",
+    "Öğretim Üyesi": "Doç. Dr. Jawad RASHEED",
+    "Sınavlar": [
+      {
+        "Sınav Türü": "Final 1",
+        "Not": "",
+        "Ortalama": "",
+        "Yüzde Dilimi": "60.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "30.04.2025"
+      },
+      {
+        "Sınav Türü": "Proje 1",
+        "Not": "95",
+        "Ortalama": "92.42",
+        "Yüzde Dilimi": "40.00 %",
+        "Sınav Tarihi": "",
+        "İlan Tarihi": "30.04.2025"
+      }
+    ]
+  }
+]
