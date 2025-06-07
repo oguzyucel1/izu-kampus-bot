@@ -16,6 +16,19 @@ HTML_PATH = "sinav_sonuclari.html"
 CACHE_DIR = ".cache"
 JSON_PATH = os.path.join(CACHE_DIR, "onceki_notlar_duzenli.json")
 
+def send_cache_content(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        if len(content) > 3900:
+            send_telegram_message("📁 JSON içeriği çok büyük, dosya olarak gönderiliyor.")
+            send_file_to_telegram(file_path, caption="📦 Cache JSON içeriği")
+        else:
+            send_telegram_message(f"🧾 Cache içeriği:\n\n{content}")
+    else:
+        send_telegram_message("❌ Cache dosyası bulunamadı.")
+
+
 # Telegram fonksiyonları
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -141,3 +154,6 @@ with open(JSON_PATH, "w", encoding="utf-8") as f:
     json.dump(duzenlenmis, f, ensure_ascii=False, indent=2)
 
 print("✅ Güncellenmiş JSON cache'e yazıldı.")
+
+send_cache_content(JSON_PATH)
+
