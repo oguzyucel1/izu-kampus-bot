@@ -9,21 +9,20 @@ jobs:
   bot-job:
     runs-on: ubuntu-latest
     env:
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-        KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
-        SIFRE: ${{ secrets.SIFRE }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+      KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
+      SIFRE: ${{ secrets.SIFRE }}
 
     steps:
     - name: 📥 Repo klonlanıyor
       uses: actions/checkout@v3
 
-    - name: 💾 Önceki JSON dosyaları cache'ten yükleniyor
+    - name: 💾 JSON dosyaları cache'ten yükleniyor (veya güncellenecek)
       uses: actions/cache@v3
       with:
-        path: |
-          .cache/
-        key: json-cache-${{ runner.os }}-${{ github.run_id }}
+        path: .cache
+        key: json-cache-${{ runner.os }}-veri
         restore-keys: |
           json-cache-${{ runner.os }}
 
@@ -37,12 +36,3 @@ jobs:
 
     - name: 🚀 Bot çalıştırılıyor
       run: python main.py
-
-    - name: 💾 Güncel JSON dosyaları cache'e yazılıyor
-      uses: actions/cache@v3
-      with:
-        path: |
-          .cache/onceki_*.json
-        key: json-cache-${{ runner.os }}-${{ github.run_id }}
-        restore-keys: |
-          json-cache-${{ runner.os }}
