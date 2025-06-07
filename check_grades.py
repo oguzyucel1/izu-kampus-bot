@@ -139,3 +139,17 @@ with open(JSON_PATH, "w", encoding="utf-8") as f:
     json.dump(yeni_kayit, f, ensure_ascii=False, indent=2)
 
 print("✅ JSON güncellendi ve cache'e yazıldı.")
+
+# JSON içeriğini Telegram’a metin olarak gönder
+try:
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        json_text = f.read()
+    max_len = 4000
+    if len(json_text) <= max_len:
+        send_telegram_message(f"📦 Notlar JSON içeriği:\n\n{json_text}")
+    else:
+        for i in range(0, len(json_text), max_len):
+            send_telegram_message(f"📦 JSON içeriği (parça):\n\n{json_text[i:i+max_len]}")
+except Exception as e:
+    send_telegram_message(f"⚠️ JSON içeriği gönderilemedi: {e}")
+
