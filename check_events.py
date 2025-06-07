@@ -1,86 +1,93 @@
-import os
 import json
+import os
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
-from dotenv import load_dotenv
 import requests
+from dotenv import load_dotenv
 
-# ENV yükle
+# Ortam değişkenlerini yükle
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
 HTML_PATH = "home.html"
-JSON_PATH = "onceki_etkinlikler.json"
+CACHE_PATH = "onceki_etkinlikler.json"
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}
-    requests.post(url, data=data)
+    requests.post(url, data={"chat_id": CHAT_ID, "text": text})
 
-def normalize(text):
+def normalize_whitespace(text):
     return re.sub(r"\s+", " ", text.strip())
 
-def parse_events_from_html(html_path):
-    with open(html_path, "r", encoding="utf-8") as f:
+def parse_events_from_html(path):
+    with open(path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
     etkinlikler = []
-    for li in soup.select("ul.feeds > li.hoverable"):
-        etkinlik_span = li.select_one(".desc span")
-        tarih_div = li.select_one(".date")
-        if etkinlik_span and tarih_div:
-            etkinlik_text = normalize(etkinlik_span.text)
-            saat_kisim = etkinlik_text.split("|")[0].strip()
-            ad_kisim = etkinlik_text.split("|")[1].split("(")[0].strip()
-            ogretmen_kisim = etkinlik_text.split("(")[-1].split(")")[0].strip() if "(" in etkinlik_text else ""
-            gun_satiri, tarih = map(str.strip, tarih_div.text.split("\n"))
-            etkinlikler.append({
-                "etkinlik": ad_kisim,
-                "saat": saat_kisim,
-                "tarih": tarih,
-                "ogretim_uyesi": ogretmen_kisim
-            })
+    for li in soup.select("li.hoverable"):
+        etkinlik = {}
+        baslik_div = li.select_one("div.event-baslik")
+        detay_divs = li.select("div.event-detaylar > div")
+
+        if not baslik_div or len(detay_divs) < 3:
+            continue  # Beklenen yapı yoksa geç
+
+        etkinlik["etkinlik"] = normalize_whitespace(baslik_div.text)
+
+        tarih_div = detay_divs[0]
+        try:
+            gun_satiri, tarih = map(str.strip, tarih_div.text.strip().split("\n", 1))
+            etkinlik["tarih"] = tarih
+        except ValueError:
+            etkinlik["tarih"] = "Tarih Bilinmiyor"
+
+        saat_div = detay_divs[1]
+        etkinlik["saat"] = normalize_whitespace(saat_div.text)
+
+        ogretim_div = detay_divs[2]
+        ogretim_text = normalize_whitespace(ogretim_div.text)
+        etkinlik["ogretim_uyesi"] = ogretim_text.replace("(", "").replace(")", "")
+
+        etkinlikler.append(etkinlik)
     return etkinlikler
 
-def load_previous_events(json_path):
-    if os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as f:
+def load_old_events():
+    if os.path.exists(CACHE_PATH):
+        with open(CACHE_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return []
 
-def save_current_events(json_path, events):
-    with open(json_path, "w", encoding="utf-8") as f:
+def save_events_to_cache(events):
+    with open(CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump(events, f, ensure_ascii=False, indent=2)
 
-def etkinlik_farki_yazdir(yeni_liste, eski_liste):
-    eski_set = {json.dumps(e, sort_keys=True) for e in eski_liste}
-    farklar = [json.loads(e) for e in {json.dumps(e, sort_keys=True) for e in yeni_liste} - eski_set]
-    return farklar
+def compare_events(yeni, eski):
+    eski_set = {json.dumps(e, sort_keys=True) for e in eski}
+    yeni_set = {json.dumps(e, sort_keys=True) for e in yeni}
+    fark = yeni_set - eski_set
+    return [json.loads(e) for e in fark]
 
-# 1. Parse et
+# 📄 HTML'den etkinlikleri oku
 guncel_etkinlikler = parse_events_from_html(HTML_PATH)
+eski_etkinlikler = load_old_events()
+farkli_etkinlikler = compare_events(guncel_etkinlikler, eski_etkinlikler)
 
-# 2. Önceki JSON'dan oku
-onceki_etkinlikler = load_previous_events(JSON_PATH)
-
-# 3. Farkları karşılaştır
-farkli_etkinlikler = etkinlik_farki_yazdir(guncel_etkinlikler, onceki_etkinlikler)
-
-# 4. Bildirim gönder
+# 🧾 Bildirim gönder
 if farkli_etkinlikler:
+    mesaj = f"🎯 <b>Yeni Etkinlikler</b> ({datetime.now().strftime('%Y-%m-%d %H:%M')}):\n\n"
     for e in farkli_etkinlikler:
-        mesaj = (
-            f"*📢 Yeni Etkinlik*\n"
-            f"🎓 *Etkinlik Adı:* {e['etkinlik']}\n"
-            f"⏰ *Saat:* {e['saat']}\n"
-            f"📅 *Tarih:* {e['tarih']}\n"
-            f"👤 *Öğretim Üyesi:* {e['ogretim_uyesi']}\n"
-            f"🔗 Detaylara sistemden ulaşabilirsiniz."
+        mesaj += (
+            f"📌 <b>{e['etkinlik']}</b>\n"
+            f"📅 {e['tarih']}\n"
+            f"🕓 {e['saat']}\n"
+            f"👨‍🏫 {e['ogretim_uyesi']}\n"
+            f"ℹ️ Detaylara sistemden ulaşabilirsiniz.\n\n"
         )
-        send_telegram_message(mesaj)
+    print(mesaj)
+    send_telegram_message(mesaj)
 else:
-    send_telegram_message("📭 Yeni etkinlik bulunamadı.")
+    send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
-# 5. JSON'u güncelle
-save_current_events(JSON_PATH, guncel_etkinlikler)
+# 💾 JSON cache güncelle
+save_events_to_cache(guncel_etkinlikler)
