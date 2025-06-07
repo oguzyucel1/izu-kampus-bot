@@ -1,6 +1,22 @@
 import subprocess
 import zipfile
 import os 
+import requests
+
+def send_file_to_telegram(file_path, caption="📄 Dosya"):
+    url = f"https://api.telegram.org/bot{os.getenv('BOT_TOKEN')}/sendDocument"
+    with open(file_path, "rb") as f:
+        requests.post(url, data={"chat_id": os.getenv("CHAT_ID"), "caption": caption}, files={"document": f})
+
+def zip_and_send_cache():
+    zip_name = "cache_dosyasi.zip"
+    with zipfile.ZipFile(zip_name, "w") as zipf:
+        for root, dirs, files in os.walk(".cache"):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arcname = os.path.relpath(full_path, ".cache")
+                zipf.write(full_path, arcname)
+    send_file_to_telegram(zip_name, "🗂 Tüm cache dosyaları ZIP halinde")
 
 def zip_and_send_cache():
     zip_name = "cache_dosyasi.zip"
