@@ -52,7 +52,7 @@ for attempt in range(1, MAX_ATTEMPTS + 1):
     try:
         print(f"🔍 'Sınav Sonuçları' bağlantısı aranıyor... Deneme {attempt}")
         link = WebDriverWait(driver, 30).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
+            EC.element_to_be_clickable((By.XPATH, "//a[@menuilsemno='2055']"))
         )
         link.click()
         print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
