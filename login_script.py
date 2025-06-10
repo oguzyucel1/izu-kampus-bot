@@ -74,7 +74,7 @@ else:
 
 try:
 
-    sinav_link = WebDriverWait(driver, 10).until(
+    sinav_link = WebDriverWait(driver, 20).until(
 
         EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Sınav Sonuçları')]"))
 
