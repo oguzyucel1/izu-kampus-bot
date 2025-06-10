@@ -81,7 +81,7 @@ yeni_eklenen = {eid: val for eid, val in guncel.items() if eid not in onceki}
 
 # Bildirim
 if yeni_eklenen:
-    mesaj = "*📆 Yeni Etkinlikler*\n\n"
+    mesaj = "*📆📆 Yeni Etkinlikler 📆📆*\n\n"
     for val in yeni_eklenen.values():
         bol = val.split(" - ")
         ad = bol[0] if len(bol) > 0 else ""
@@ -101,12 +101,12 @@ if yeni_eklenen:
             f"🕒 Saat: {saat}\n"
         )
         if isim:
-            mesaj += f"👤 İsim: {isim}\n"
+            mesaj += f"👤 Öğretim Görevlisi: {isim}\n"
         mesaj += "\n\n"
 
     send_telegram_message(mesaj)
 else:
-    send_telegram_message("*🔁 Yeni etkinlik bulunamadı.*")
+    send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
 
 
 # Cache'e güncel veriyi yaz
