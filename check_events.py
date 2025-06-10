@@ -17,7 +17,7 @@ JSON_PATH = os.path.join(CACHE_DIR, "onceki_etkinlikler.json")
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": text}
+    data = {"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}
     requests.post(url, data=data)
 
 def normalize(text):
@@ -81,10 +81,33 @@ yeni_eklenen = {eid: val for eid, val in guncel.items() if eid not in onceki}
 
 # Bildirim
 if yeni_eklenen:
-    mesaj = "📆 Yeni Etkinlikler:\n\n" + "\n".join(f"• {val}" for val in yeni_eklenen.values())
+    mesaj = "*📆 Yeni Etkinlikler*\n\n"
+    for val in yeni_eklenen.values():
+        bol = val.split(" - ")
+        ad = bol[0] if len(bol) > 0 else ""
+        tarih = bol[1] if len(bol) > 1 else ""
+
+        # saat birleştir (ör: 10:30 - 14:00)
+        if len(bol) >= 4:
+            saat = " - ".join(bol[2:4])
+        else:
+            saat = bol[2] if len(bol) > 2 else ""
+
+        isim = bol[4] if len(bol) > 4 else ""
+
+        mesaj += (
+            f"📌 Etkinlik: {ad}\n"
+            f"📅 Tarih: {tarih}\n"
+            f"🕒 Saat: {saat}\n"
+        )
+        if isim:
+            mesaj += f"👤 İsim: {isim}\n"
+        mesaj += "\n\n"
+
     send_telegram_message(mesaj)
 else:
-    send_telegram_message("🔁 Yeni etkinlik bulunamadı.")
+    send_telegram_message("*🔁 Yeni etkinlik bulunamadı.*")
+
 
 # Cache'e güncel veriyi yaz
 with open(JSON_PATH, "w", encoding="utf-8") as f:
