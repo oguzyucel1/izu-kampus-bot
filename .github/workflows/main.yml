@@ -1,1 +1,39 @@
 
+name: Not Takip Botu
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  bot-job:
+    runs-on: ubuntu-latest
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+      KULLANICI_ADI: ${{ secrets.KULLANICI_ADI }}
+      SIFRE: ${{ secrets.SIFRE }}
+
+    steps:
+    - name: 📥 Repo klonlanıyor
+      uses: actions/checkout@v3
+
+    - name: 💾 JSON dosyaları cache'ten yükleniyor (veya güncellenecek)
+      uses: actions/cache@v3
+      with:
+        path: .cache
+        key: json-cache-${{ runner.os }}-${{ github.run_id }}
+        restore-keys: |
+          json-cache-${{ runner.os }}
+
+    - name: 🐍 Python kurulumu
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Gereken paketler yükleniyor
+      run: pip install -r requirements.txt
+
+    - name: 🚀 Bot çalıştırılıyor
+      run: python main.py
