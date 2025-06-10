@@ -19,7 +19,7 @@ JSON_PATH = os.path.join(CACHE_DIR, "onceki_notlar.json")
 # Telegram fonksiyonları
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": message}
+    data = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
     requests.post(url, data=data)
 
 def send_file_to_telegram(file_path, caption="📄 Dosya"):
@@ -113,11 +113,14 @@ with open(JSON_PATH, "r", encoding="utf-8") as f:
 farklar = farklari_bul(yeni_dict, eski_dict)
 
 if farklar:
-    mesaj = f"🆕 Not değişiklikleri ({datetime.now().strftime('%Y-%m-%d %H:%M')}):\n\n"
+    mesaj = "*🆕🆕 Not Değişiklikleri 🆕🆕*\n\n"
     for kod, adi, tur, sinav, degisiklik in farklar:
+        ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
         mesaj += (
             f"📘 {kod} - {adi}\n"
-            f"🔄 {degisiklik}: {tur} - Not: {sinav['Not']}\n\n"
+            f"📌 Sınav: {tur}\n"
+            f"🎯 Not: {sinav['Not']}\n"
+            f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
         )
     print(mesaj)
     send_telegram_message(mesaj)
@@ -125,6 +128,7 @@ else:
     mesaj = "🔁 Yeni not girişi veya değişiklik tespit edilmedi."
     print(mesaj)
     send_telegram_message(mesaj)
+
 
 # Yeni JSON'u cache’e yaz
 yeni_kayit = {}
