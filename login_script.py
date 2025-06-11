@@ -45,19 +45,26 @@ else:
  
 # 4. Menüde "Sınav Sonuçları" linkini bul ve tıkla
 
-MAX_ATTEMPTS = 2
+
+MAX_ATTEMPTS = 3
 success = False
 
 for attempt in range(1, MAX_ATTEMPTS + 1):
     try:
         print(f"🔍 'Sınav Sonuçları' bağlantısı aranıyor... Deneme {attempt}")
+
+        # Önce DOM’da elementin varlığını bekle
         link = WebDriverWait(driver, 30).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[@menuilsemno='2055']"))
+            EC.presence_of_element_located((By.XPATH, "//a[@menuilsemno='2055']"))
         )
-        link.click()
+
+        # Sonra JavaScript ile native tıklama
+        driver.execute_script("arguments[0].click();", link)
+
         print("✅ 'Sınav Sonuçları' bağlantısına tıklandı.")
         success = True
         break
+
     except Exception as e:
         print(f"⚠️ Tıklama başarısız: {e}")
         time.sleep(2)
