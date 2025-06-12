@@ -132,20 +132,21 @@ if farklar:
                 f"📌 *{degisiklik}*\n"
                 f"🎯 Harf Notu: {sinav['Not']}\n\n\n"
             )
+            
         else:
-        mesaj += (
-            f"📘 {kod} - {adi}\n"
-            f"📌 Sınav: {tur}\n"
-            f"🎯 Not: {sinav['Not']}\n"
-            f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
-        )
+             mesaj += (
+                f"📘 {kod} - {adi}\n"
+                f"📌 Sınav: {tur}\n"
+                f"🎯 Not: {sinav['Not']}\n"
+                f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
+              )
     print(mesaj)
     send_telegram_message(mesaj)
+    
 else:
     mesaj = "🔁 Yeni not girişi veya değişiklik tespit edilmedi."
     print(mesaj)
     send_telegram_message(mesaj)
-
 
 # Yeni JSON'u cache’e yaz
 yeni_kayit = {}
