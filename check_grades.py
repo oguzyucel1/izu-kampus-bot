@@ -156,6 +156,7 @@ for kod, bilgiler in yeni_dict.items():
     yeni_kayit[kod] = {
         "Ders Adı": bilgiler["Ders Adı"],
         "Öğretim Üyesi": bilgiler["Öğretim Üyesi"],
+        "Harf Notu": bilgiler["Harf Notu"],
         "Sınavlar": bilgiler["Sınavlar"]
     }
 
