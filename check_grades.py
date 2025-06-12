@@ -125,7 +125,7 @@ farklar = farklari_bul(yeni_dict, eski_dict)
 if farklar:
     mesaj = "*🆕🆕 Not Değişiklikleri 🆕🆕*\n\n"
     for kod, adi, tur, sinav, degisiklik in farklar:
-        ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
+        ilan_tarihi = sinav.get("İlan Tarihi", "").strip().split(" ")[0]
 
         if tur == "Genel":
             mesaj +=(
