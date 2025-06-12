@@ -125,24 +125,23 @@ farklar = farklari_bul(yeni_dict, eski_dict)
 if farklar:
     mesaj = "*🆕🆕 Not Değişiklikleri 🆕🆕*\n\n"
     for kod, adi, tur, sinav, degisiklik in farklar:
+        ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
 
         if tur == "Genel":
-            ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
             mesaj +=(
                 f"📘 {kod} - {adi}\n"
                 f"📌 *{degisiklik}*\n"
                 f"🎯 Harf Notu: {sinav['Not']}"
                 f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
-            )
+                )
             
         else:
-             ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
              mesaj += (
                 f"📘 {kod} - {adi}\n"
                 f"📌 Sınav: {tur}\n"
                 f"🎯 Not: {sinav['Not']}\n"
                 f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
-              )
+                  )
     print(mesaj)
     send_telegram_message(mesaj)
     
