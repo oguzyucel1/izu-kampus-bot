@@ -132,7 +132,7 @@ if farklar:
                 f"📘 {kod} - {adi}\n"
                 f"📌 *{degisiklik}*\n"
                 f"🎯 Harf Notu: {sinav['Not']}"
-                f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
+                #f"🕒 İlan Tarihi: {ilan_tarihi}\n\n\n"
                 )
             
         else:
