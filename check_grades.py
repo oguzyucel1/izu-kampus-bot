@@ -36,6 +36,7 @@ def parse_html(path):
     ders_dict = defaultdict(lambda: {
         "Ders Adı": "",
         "Öğretim Üyesi": "",
+        "Harf Notu": "",
         "Sınavlar": {}
     })
 
@@ -47,7 +48,7 @@ def parse_html(path):
             if len(tds) < 6:
                 i += 1
                 continue
-            kod, adi, ogretmen = tds[0].text.strip(), tds[1].text.strip(), tds[2].text.strip()
+            kod, adi, ogretmen, harf_notu = tds[0].text.strip(), tds[1].text.strip(), tds[2].text.strip(), tds[5].text.strip()
 
             if i + 1 < len(rows):
                 detay = rows[i + 1]
@@ -60,6 +61,7 @@ def parse_html(path):
                                 sinav_turu = cols[0].text.strip()
                                 ders_dict[kod]["Ders Adı"] = adi
                                 ders_dict[kod]["Öğretim Üyesi"] = ogretmen
+                                ders_dict[kod]["Harf Notu"] = harf_notu
                                 ders_dict[kod]["Sınavlar"][sinav_turu] = {
                                     "Not": cols[1].text.strip(),
                                     "Ortalama": cols[2].text.strip(),
@@ -81,7 +83,15 @@ def farklari_bul(yeni, eski):
             for sinav_turu, sinav in bilgiler["Sınavlar"].items():
                 if sinav["Not"]:
                     farklar.append((kod, bilgiler["Ders Adı"], sinav_turu, sinav, "Yeni sınav türü"))
+            if bilgiler["Harf Notu"]:
+                farklar.append((kod, bilgiler["Ders Adı"], "Genel", {"Not": bilgiler["Harf Notu"]}, "Yeni harf notu"))
         else:
+            eski_harf = eski[kod].get("Harf Notu", "").strip()
+            yeni_harf = bilgiler.get("Harf Notu", "").strip()
+            if eski_harf != yeni_harf and yeni_harf:
+                degisiklik = "Harf notu girildi" if not eski_harf else "Harf notu değiştirildi"
+                farklar.append((kod, bilgiler["Ders Adı"], "Genel", {"Not": yeni_harf}, degisiklik))
+
             eski_sinavlar = eski[kod]["Sınavlar"]
             for sinav_turu, sinav in bilgiler["Sınavlar"].items():
                 if sinav_turu in eski_sinavlar:
@@ -114,8 +124,15 @@ farklar = farklari_bul(yeni_dict, eski_dict)
 
 if farklar:
     mesaj = "*🆕🆕 Not Değişiklikleri 🆕🆕*\n\n"
+    ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
     for kod, adi, tur, sinav, degisiklik in farklar:
-        ilan_tarihi = sinav["İlan Tarihi"].strip().split(" ")[0]  # sadece tarih
+        if tur == "Genel":
+            mesaj +=(
+                f"📘 {kod} - {adi}\n"
+                f"📌 *{degisiklik}*\n"
+                f"🎯 Harf Notu: {sinav['Not']}\n\n\n"
+            )
+        else:
         mesaj += (
             f"📘 {kod} - {adi}\n"
             f"📌 Sınav: {tur}\n"
