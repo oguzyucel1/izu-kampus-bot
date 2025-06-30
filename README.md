@@ -59,8 +59,12 @@ CHAT_ID=... Kişisel Telegram Botunuza ait Chat ID'niz
 ---
 ### ⏱️ Zamanlama Sistemi
 
-Şu anda GitHub Actions üzerinden main.py dosyası her 10 dakikada bir çalışacak şekilde ayarlanmıştır.
+ - Şu anda GitHub Actions üzerinden main.py dosyası her 10 dakikada bir çalışacak şekilde ayarlanmıştır.
 (Free plan nedeniyle gecikmeler yaşanabilir.)
+
+ - github/workflows/workflow.yaml dosyaında cron job degerini botun kaç dakikada bir çalışmasını istediğinize göre ayarlayabilirsiniz.
+
+ - workflow_dispatch : Botu test için manuel tetiklenmesini aktive eder.
 
 ---
 
