@@ -53,8 +53,8 @@ python main.py
 ```bash
 KULLANICI_ADI=... Üniversite E-Postası
 SIFRE=... KBS Şifreniz
-BOT_TOKEN=... Telegram Bot Tokeni ( ileride public olarak sağlanacaktır!)
-CHAT_ID=... Kişisel Telegram Bot Chat ID ( kişisel kullanım entegresi ile birlikte gelecektir.)
+BOT_TOKEN=... Telegram Bot Tokeniniz
+CHAT_ID=... Kişisel Telegram Botunuza ait Chat ID'niz
 ```
 ---
 ### ⏱️ Zamanlama Sistemi
